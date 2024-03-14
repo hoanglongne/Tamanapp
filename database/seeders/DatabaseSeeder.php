@@ -25,6 +25,12 @@ class DatabaseSeeder extends Seeder
         // ]);
 
             // For each user, create 5 tasks
+
+    User::factory()->create([
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'password',
+    ]);
     User::factory(10)->create();
 
     User::all()->each(function ($user) {

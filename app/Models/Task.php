@@ -49,6 +49,6 @@ class Task extends Model
      */
     public function monitoredUsers()
     {
-        return $this->belongsToMany(User::class, 'task_user');
+        return $this->belongsToMany(User::class, 'task_assignments');
     }
 }
