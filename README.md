@@ -37,14 +37,14 @@ npm install
 php artisan key:generate
 ```
 
-8. Migrate database và tạo sẵn dữ liệu giả:
-```
-php artisan migrate --seed
-```
-
-9. Chạy docker compose:
+8. Chạy docker compose:
 ```
 docker-compose up -d
+```
+
+9. Migrate database và tạo sẵn dữ liệu giả:
+```
+php artisan migrate --seed
 ```
 
 10. Chạy server Laravel:
