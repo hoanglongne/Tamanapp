@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
+use \App\Models\TaskAssignment;
+use \App\Models\User;
 
 class TaskController extends Controller
 {
@@ -22,7 +24,9 @@ class TaskController extends Controller
      */
     public function create()
     {
-        return inertia('Task/Create');
+        return inertia('Task/Create', [
+            'users' => User::all()
+        ]);
     }
 
     /**
@@ -35,10 +39,21 @@ class TaskController extends Controller
             'description' => 'required',
             'status' => 'required',
             'deadline' => 'required|date|after:today|before:+1 year',
-            'created_by_user_id' => 'required|exists:users,id'
+            'created_by_user_id' => 'required|exists:users,id',
+            'user_id' => 'nullable|exists:users,id' // user to assign the task to
         ]);
-
-        Task::create($request->all());
+    
+        // Create the task
+        $task = Task::create($request->except('user_id'));
+    
+        // Create the task assignment if user_id is provided
+        if ($request->user_id) {
+            $taskAssignment = TaskAssignment::create([
+                'task_id' => $task->id,
+                'user_id' => $request->user_id
+            ]);
+        }
+    
         return redirect()->route('tasks.index')->with('success', 'Task created successfully');
     }
 
@@ -58,7 +73,8 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
         return inertia('Task/Edit', [
-            'tasks' => $task
+            'tasks' => $task,
+            'users' => User::all()
         ]);
     }
 
@@ -71,11 +87,27 @@ class TaskController extends Controller
             'title' => 'required|min:8|max:60',
             'description' => 'required',
             'status' => 'required',
-            'deadline' => 'required',
-            'created_by_user_id' => 'required|exists:users,id'
+            'deadline' => 'required|date|after:today|before:+1 year',
+            'created_by_user_id' => 'required|exists:users,id',
+            'user_id' => 'nullable|exists:users,id' // user to assign the task to
         ]);
-
-        $task->update($request->all());
+    
+        // Update the task
+        $task->update($request->except('user_id'));
+    
+        // Update the task assignment if user_id is provided
+        if ($request->user_id) {
+            $taskAssignment = TaskAssignment::where('task_id', $task->id)->first();
+            if ($taskAssignment) {
+                $taskAssignment->update(['user_id' => $request->user_id]);
+            } else {
+                TaskAssignment::create([
+                    'task_id' => $task->id,
+                    'user_id' => $request->user_id
+                ]);
+            }
+        }
+    
         return redirect()->route('tasks.index')->with('success', 'Task updated successfully');
     }
 
@@ -86,5 +118,12 @@ class TaskController extends Controller
     {
         $task->deleteOrFail();
         return redirect()->route('tasks.index')->with('success', 'Task deleted successfully');
+    }
+
+    public function kanban(Task $task)
+    {
+        return inertia('Kanban/Index', [
+            'task' => $task->load('user')
+        ]);
     }
 }

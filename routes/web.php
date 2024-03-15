@@ -19,7 +19,12 @@ use App\Http\Controllers\AuthController;
 
 Route::get('/', [IndexController::class, 'index']);
 Route::resource('users', UserController::class)->only(['index', 'show']);
-Route::resource('tasks', TaskController::class);
+Route::get('tasks/kanban', [TaskController::class, 'kanban']);
+
+Route::resource('tasks', TaskController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->middleware('auth');
+Route::resource('tasks', TaskController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
+
+
 Route::get('login', [AuthController::class, 'create'])
   ->name('login');
 Route::post('login', [AuthController::class, 'store'])

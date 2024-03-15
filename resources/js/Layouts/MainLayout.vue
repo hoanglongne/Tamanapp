@@ -1,6 +1,6 @@
 <template>
     <div class="flex">
-        <button @click="toggleSidebar" class="absolute z-20 p-4 md:hidden">
+        <button @click="toggleSidebar" class="fixed z-20 p-4 md:hidden">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 12L6 6"></path>
             </svg>
@@ -17,11 +17,19 @@
                 <Link href="/">Welcome</Link>
                 <Link href="/users">Employee</Link>
                 <Link href="/tasks">Task</Link>
-                <Link href="/tasks/create">Add Task</Link>
+                <Link v-if="userAuth" href="/tasks/create">Add Task</Link>
             </div>
 
             <div class="mt-auto mb-10 text-lg">
-                <Link href="/login">Login</Link>
+                <div v-if="userAuth" class="flex flex-col items-center gap-4">
+                  <div class="text-sm text-gray-500">{{ userAuth.name }}</div>
+                  <div>
+                    <Link :href="route('logout')" method="delete" as="button">Logout</Link>
+                  </div>
+                </div>
+                <div v-else>
+                  <Link :href="route('login')">Sign-In</Link>
+                </div>
             </div>
         </div>
 
@@ -36,6 +44,16 @@
 import { computed, ref, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import { useToast } from 'vue-toast-notification'
+
+const page = usePage()
+const userAuth = computed(
+  () => page.props.userAuth,
+)
+  
+const isOpen = ref(false)
+const flashSuccess = computed(
+    () => page.props.flash.success,
+)
 
 let mql
 
@@ -55,11 +73,6 @@ onBeforeUnmount(() => {
   mql.removeListener(toggleSidebar)
 })
 
-const isOpen = ref(false)
-const page = usePage()
-const flashSuccess = computed(
-    () => page.props.flash.success,
-)
 
 const toast = useToast()
 

@@ -39,6 +39,13 @@
                 </div>
             </div>
 
+            <label for="users" class="text-sm">Assign to:  </label>
+            <select class="border border-gray-300 rounded-sm text-sm" id="users" v-model="form.user_id">
+                <option v-for="user in users" :key="user.id" :value="user.id">
+                    {{ user.name }}
+                </option>
+            </select>
+
             <div>
                 <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
             </div>
@@ -47,10 +54,13 @@
 </template>
 
 <script setup>
-    import {useForm} from '@inertiajs/vue3';
+    import {useForm, usePage} from '@inertiajs/vue3';
+
+    const page = usePage();
 
     const props = defineProps({
-        tasks: Object
+        tasks: Object,
+        users: Array
     });
 
     const form = useForm({
@@ -58,7 +68,8 @@
         description: props.tasks.description,
         status: props.tasks.status,
         deadline: props.tasks.deadline.split('T')[0], 
-        created_by_user_id: props.tasks.created_by_user_id
+        created_by_user_id: props.tasks.created_by_user_id,
+        user_id: props.tasks.user_id
     });
 
     const edit = () => form.put(route('tasks.update', props.tasks.id));

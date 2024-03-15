@@ -36,7 +36,7 @@
     import { formatDistanceToNow, parseISO } from 'date-fns';
 
     defineProps({task: Object});
-
+    
     const formatDeadline = (date) => {
         return formatDistanceToNow(parseISO(date), { addSuffix: true });
     };
